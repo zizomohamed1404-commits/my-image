@@ -2,32 +2,61 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>موقع ضغط الصور</title>
+    <title>ضاغط الصور السريع</title>
     <style>
-        body { font-family: Arial; text-align: center; padding-top: 50px; background-color: #f9f9f9; }
-        .box { background: white; padding: 30px; border-radius: 15px; display: inline-block; border: 1px solid #ccc; }
-        input { margin: 20px 0; }
-        #status { font-weight: bold; color: #333; }
+        body { font-family: sans-serif; text-align: center; padding: 50px; }
+        #downloadBtn {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: none;
+            margin-top: 20px;
+        }
+        img { max-width: 300px; margin-top: 20px; display: none; }
     </style>
 </head>
 <body>
 
-<div class="box">
-    <h1>أداة ضغط الصور</h1>
+    <h2>ضاغط الصور السريع</h2>
     <input type="file" id="upload" accept="image/*">
-    <p id="status">يرجى اختيار صورة للبدء</p>
-</div>
+    <br>
+    <img id="preview" alt="الصورة بعد الضغط">
+    <br>
+    <a id="downloadBtn">تحميل الصورة المضغوطة</a>
+    <p id="status"></p>
 
-<script>
-    document.getElementById('upload').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        document.getElementById('status').innerText = "تم اختيار الصورة: " + file.name + "\nالحجم الأصلي: " + (file.size / 1024 / 1024).toFixed(2) + " MB";
-        
-        // هنا يمكنك إضافة منطق الضغط لاحقاً
-    });
-</script>
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.0/dist/browser-image-compression.js"></script>
+    <script>
+        const uploadInput = document.getElementById('upload');
+        const status = document.getElementById('status');
+        const preview = document.getElementById('preview');
+        const downloadBtn = document.getElementById('downloadBtn');
 
+        uploadInput.addEventListener('change', async (event) => {
+            const imageFile = event.target.files[0];
+            if (!imageFile) return;
+
+            status.innerText = "جاري الضغط... انتظر قليلاً";
+            
+            const options = { maxSizeMB: 0.5, maxWidthOrHeight: 1024, useWebWorker: true };
+
+            try {
+                const compressedFile = await imageCompression(imageFile, options);
+                
+                preview.src = URL.createObjectURL(compressedFile);
+                preview.style.display = "inline-block";
+                
+                downloadBtn.href = URL.createObjectURL(compressedFile);
+                downloadBtn.download = "compressed_" + imageFile.name;
+                downloadBtn.style.display = "inline-block";
+                
+                status.innerText = `تم الضغط بنجاح! الحجم الجديد: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`;
+            } catch (error) {
+                status.innerText = "حدث خطأ أثناء الضغط.";
+            }
+        });
+    </script>
 </body>
 </html>
