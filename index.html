@@ -15,18 +15,54 @@
             margin-top: 20px;
         }
         img { max-width: 300px; margin-top: 20px; display: none; }
-    </style>
-</head>
-<body>
+  <style>
+    /* 1. تصميم الصفحة ككل */
+    body { 
+        font-family: 'Segoe UI', Tahoma, sans-serif; 
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* خلفية متدرجة */
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+        color: white;
+    }
 
-    <h2>ضاغط الصور السريع</h2>
-    <input type="file" id="upload" accept="image/*">
-    <br>
-    <img id="preview" alt="الصورة بعد الضغط">
-    <br>
-    <a id="downloadBtn">تحميل الصورة المضغوطة</a>
-    <p id="status"></p>
+    /* 2. تصميم "الصندوق" الذي يحوي الأدوات */
+    .container { 
+        background: rgba(255, 255, 255, 0.1); 
+        padding: 40px; 
+        border-radius: 20px; 
+        backdrop-filter: blur(10px); /* تأثير الزجاج الضبابي */
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        text-align: center;
+        width: 90%;
+        max-width: 400px;
+    }
 
+    /* 3. تصميم زر التحميل ليصبح جذاباً */
+    #downloadBtn {
+        background-color: #ff7e5f;
+        color: white;
+        padding: 15px 30px;
+        text-decoration: none;
+        border-radius: 50px; /* زر دائري */
+        display: none;
+        margin-top: 20px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    #downloadBtn:hover { background-color: #feb47b; transform: scale(1.05); }
+
+    /* 4. تصميم الصور */
+    img { 
+        max-width: 100%; 
+        margin-top: 20px; 
+        display: none; 
+        border-radius: 10px; 
+        border: 3px solid white;
+    }
+</style>
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.0/dist/browser-image-compression.js"></script>
     <script>
         const uploadInput = document.getElementById('upload');
