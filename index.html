@@ -2,46 +2,31 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>ضاغط الصور</title>
+    <title>موقع ضغط الصور</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f0f0f0; }
-        .container { background: white; padding: 20px; border-radius: 10px; display: inline-block; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        img { max-width: 300px; display: block; margin: 20px auto; }
+        body { font-family: Arial; text-align: center; padding-top: 50px; background-color: #f9f9f9; }
+        .box { background: white; padding: 30px; border-radius: 15px; display: inline-block; border: 1px solid #ccc; }
+        input { margin: 20px 0; }
+        #status { font-weight: bold; color: #333; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>ضاغط الصور</h2>
+<div class="box">
+    <h1>أداة ضغط الصور</h1>
     <input type="file" id="upload" accept="image/*">
-    <img id="preview" style="display:none;">
-    <a id="downloadBtn" style="display:none; background: green; color: white; padding: 10px; text-decoration: none;">تحميل الصورة</a>
+    <p id="status">يرجى اختيار صورة للبدء</p>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.0/dist/browser-image-compression.js"></script>
 <script>
-    const upload = document.getElementById('upload');
-    const preview = document.getElementById('preview');
-    const btn = document.getElementById('downloadBtn');
-
-    upload.onchange = async (e) => {
+    document.getElementById('upload').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
         
-        // إظهار نص التحميل
-        preview.src = URL.createObjectURL(file);
-        preview.style.display = 'block';
-
-        try {
-            const compressedFile = await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 1024 });
-            btn.href = URL.createObjectURL(compressedFile);
-            btn.download = "compressed_" + file.name;
-            btn.style.display = 'inline-block';
-            alert('تم ضغط الصورة!');
-        } catch (err) {
-            alert('حدث خطأ في الضغط');
-        }
-    };
+        document.getElementById('status').innerText = "تم اختيار الصورة: " + file.name + "\nالحجم الأصلي: " + (file.size / 1024 / 1024).toFixed(2) + " MB";
+        
+        // هنا يمكنك إضافة منطق الضغط لاحقاً
+    });
 </script>
 
 </body>
