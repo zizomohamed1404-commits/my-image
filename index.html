@@ -2,61 +2,152 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>ضاغط الصور السريع</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أداة الضغط والتحويل الشاملة</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; }
-        #downloadBtn {
-            background-color: #28a745;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 5px;
-            display: none;
+        body { 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); 
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            color: #333;
+        }
+        .container { 
+            background: rgba(255, 255, 255, 0.95); 
+            padding: 40px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+        }
+        h2 { color: #1e3c72; margin-bottom: 20px; }
+        input[type="file"] {
+            display: block;
+            margin: 0 auto 20px auto;
+            padding: 10px;
+            border: 2px dashed #1e3c72;
+            border-radius: 10px;
+            width: 80%;
+            cursor: pointer;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
             margin-top: 20px;
         }
-        img { max-width: 300px; margin-top: 20px; display: none; }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            display: none; /* مخفي في البداية */
+        }
+        button:hover { background-color: #218838; transform: translateY(-2px); }
+        #pdfBtn { background-color: #dc3545; }
+        #pdfBtn:hover { background-color: #c82333; }
+        #status { margin-top: 20px; font-weight: bold; color: #555; }
     </style>
 </head>
 <body>
 
-    <h2>ضاغط الصور السريع</h2>
+<div class="container">
+    <h2>أداة الضغط والتحويل</h2>
+    <p>اختر صورة ليتم ضغطها وتقليل حجمها فوراً</p>
+    
     <input type="file" id="upload" accept="image/*">
-    <br>
-    <img id="preview" alt="الصورة بعد الضغط">
-    <br>
-    <a id="downloadBtn">تحميل الصورة المضغوطة</a>
     <p id="status"></p>
 
-    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.0/dist/browser-image-compression.js"></script>
-    <script>
-        const uploadInput = document.getElementById('upload');
-        const status = document.getElementById('status');
-        const preview = document.getElementById('preview');
-        const downloadBtn = document.getElementById('downloadBtn');
+    <div class="btn-group">
+        <button id="imgBtn" onclick="downloadImage()">تحميل كصورة مضغوطة</button>
+        <button id="pdfBtn" onclick="downloadPDF()">تحميل كـ PDF مضغوط</button>
+    </div>
+</div>
 
-        uploadInput.addEventListener('change', async (event) => {
-            const imageFile = event.target.files[0];
-            if (!imageFile) return;
+<script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-            status.innerText = "جاري الضغط... انتظر قليلاً";
+<script>
+    const uploadInput = document.getElementById('upload');
+    const statusText = document.getElementById('status');
+    const imgBtn = document.getElementById('imgBtn');
+    const pdfBtn = document.getElementById('pdfBtn');
+    
+    let globalCompressedFile = null;
+
+    // بمجرد اختيار الصورة، سيتم ضغطها فوراً في الخلفية
+    uploadInput.addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        statusText.style.color = "#007bff";
+        statusText.innerText = "جاري الضغط الاحترافي... لحظات من فضلك ⏳";
+        imgBtn.style.display = "none";
+        pdfBtn.style.display = "none";
+
+        const options = {
+            maxSizeMB: 0.5, // أقصى حجم للصورة نص ميجا
+            maxWidthOrHeight: 1200,
+            useWebWorker: true
+        };
+
+        try {
+            globalCompressedFile = await imageCompression(file, options);
+            const originalSize = (file.size / 1024 / 1024).toFixed(2);
+            const newSize = (globalCompressedFile.size / 1024 / 1024).toFixed(2);
             
-            const options = { maxSizeMB: 0.5, maxWidthOrHeight: 1024, useWebWorker: true };
+            statusText.style.color = "#28a745";
+            statusText.innerText = `✅ تم الضغط بنجاح!\nالحجم القديم: ${originalSize} MB\nالحجم الجديد: ${newSize} MB`;
+            
+            // إظهار أزرار التحميل
+            imgBtn.style.display = "inline-block";
+            pdfBtn.style.display = "inline-block";
+        } catch (error) {
+            statusText.style.color = "#dc3545";
+            statusText.innerText = "❌ حدث خطأ أثناء الضغط، حاول بصورة أخرى.";
+        }
+    });
 
-            try {
-                const compressedFile = await imageCompression(imageFile, options);
-                
-                preview.src = URL.createObjectURL(compressedFile);
-                preview.style.display = "inline-block";
-                
-                downloadBtn.href = URL.createObjectURL(compressedFile);
-                downloadBtn.download = "compressed_" + imageFile.name;
-                downloadBtn.style.display = "inline-block";
-                
-                status.innerText = `تم الضغط بنجاح! الحجم الجديد: ${(compressedFile.size / 1024 / 1024).toFixed(2)} MB`;
-            } catch (error) {
-                status.innerText = "حدث خطأ أثناء الضغط.";
-            }
-        });
-    </script>
+    // دالة تحميل الصورة المضغوطة
+    function downloadImage() {
+        if (!globalCompressedFile) return;
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(globalCompressedFile);
+        link.download = "Compressed_Image.jpg";
+        link.click();
+    }
+
+    // دالة تحويل الصورة المضغوطة لـ PDF
+    function downloadPDF() {
+        if (!globalCompressedFile) return;
+        
+        statusText.innerText = "جاري تجهيز الـ PDF... ⏳";
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const imgData = e.target.result;
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // إضافة الصورة بحجم متناسق داخل الـ PDF
+            doc.addImage(imgData, 'JPEG', 10, 10, 190, 0); 
+            doc.save("Compressed_Document.pdf");
+            
+            statusText.innerText = "✅ تم تحميل الـ PDF بنجاح!";
+        };
+        reader.readAsDataURL(globalCompressedFile);
+    }
+</script>
+
 </body>
 </html>
+
